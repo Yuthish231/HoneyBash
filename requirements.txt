@@ -1,0 +1,11 @@
+twisted>=24.0.0
+dnspython>=2.6.0
+paramiko>=3.4.0
+pyOpenSSL>=24.0.0
+cryptography>=42.0.0
+psutil>=5.9.0
+netifaces2>=0.0.22
+impacket>=0.11.0
+redis>=5.0.0
+pymysql>=1.1.0
+zope.interface>=6.0
