@@ -13,6 +13,8 @@ except ImportError:
     psycopg_connect = None
     sql = None
 
+POSTGRES_AVAILABLE = psycopg_connect is not None
+
 logger = logging.getLogger("honeybash.error")
 
 

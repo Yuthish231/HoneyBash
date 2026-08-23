@@ -1,12 +1,11 @@
 import logging
+import socketserver
 from contextlib import suppress
 from pathlib import Path
 from random import randint
 from tempfile import TemporaryDirectory
 from threading import current_thread
 from unittest.mock import patch
-
-from six.moves import socketserver
 
 from honeybash.core.base_honeypot import BaseServer
 from honeybash.utils.network_utils import (

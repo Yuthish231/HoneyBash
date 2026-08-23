@@ -9,3 +9,4 @@ impacket>=0.11.0
 redis>=5.0.0
 pymysql>=1.1.0
 zope.interface>=6.0
+scapy>=2.5.0

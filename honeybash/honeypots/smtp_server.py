@@ -61,13 +61,21 @@ class QSMTPServer(BaseServer):
 
             def ext_AUTH(self, arg):
                 if arg.startswith(b"PLAIN "):
-                    _, username, password = (
-                        b64decode(arg.split(b" ")[1].strip())
-                        .decode("utf-8", errors="replace")
-                        .split("\0")
-                    )
-                    _q_s.check_login(username, password, self.transport.getPeer().host, self.transport.getPeer().port)
-                self.sendCode(235,b"Authentication successful.")
+                    with suppress(Exception):
+                        parts = (
+                            b64decode(arg.split(b" ")[1].strip())
+                            .decode("utf-8", errors="replace")
+                            .split("\0")
+                        )
+                        if len(parts) == 3:
+                            _, username, password = parts
+                            _q_s.check_login(
+                                username,
+                                password,
+                                self.transport.getPeer().host,
+                                self.transport.getPeer().port,
+                            )
+                self.sendCode(235, b"Authentication successful.")
 
         class CustomSMTPFactory(Factory):
             protocol = CustomSMTPProtocol

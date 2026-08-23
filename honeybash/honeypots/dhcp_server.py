@@ -11,6 +11,39 @@ from honeybash.utils.network_utils import check_bytes, server_arguments
 class QDHCPServer(BaseServer):
     NAME = "dhcp_server"
     DEFAULT_PORT = 67
+    DEFAULT_DHCP_IP = "192.168.1.1"
+    DEFAULT_DHCP_IP_LEASE = "192.168.1.100"
+    DEFAULT_SUBNET_MASK = "255.255.255.0"
+    DEFAULT_ROUTER = "192.168.1.1"
+    DEFAULT_DNS_SERVER = "8.8.8.8"
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.dhcp_ip = (
+            kwargs.get("dhcp_ip")
+            or (hasattr(self, "dhcp_ip") and self.dhcp_ip)
+            or self.DEFAULT_DHCP_IP
+        )
+        self.dhcp_ip_lease = (
+            kwargs.get("dhcp_ip_lease")
+            or (hasattr(self, "dhcp_ip_lease") and self.dhcp_ip_lease)
+            or self.DEFAULT_DHCP_IP_LEASE
+        )
+        self.subnet_mask = (
+            kwargs.get("subnet_mask")
+            or (hasattr(self, "subnet_mask") and self.subnet_mask)
+            or self.DEFAULT_SUBNET_MASK
+        )
+        self.router = (
+            kwargs.get("router")
+            or (hasattr(self, "router") and self.router)
+            or self.DEFAULT_ROUTER
+        )
+        self.dns_server = (
+            kwargs.get("dns_server")
+            or (hasattr(self, "dns_server") and self.dns_server)
+            or self.DEFAULT_DNS_SERVER
+        )
 
     def server_main(self):
         _q_s = self
@@ -103,6 +136,14 @@ if __name__ == "__main__":
     parsed = server_arguments()
     if parsed.docker or parsed.aws or parsed.custom:
         qdhcpserver = QDHCPServer(
-            ip=parsed.ip, port=parsed.port, options=parsed.options, config=parsed.config
+            ip=parsed.ip,
+            port=parsed.port,
+            options=parsed.options,
+            config=parsed.config,
+            dhcp_ip=parsed.dhcp_ip,
+            dhcp_ip_lease=parsed.dhcp_ip_lease,
+            subnet_mask=parsed.subnet_mask,
+            router=parsed.router,
+            dns_server=parsed.dns_server,
         )
         qdhcpserver.run_server()

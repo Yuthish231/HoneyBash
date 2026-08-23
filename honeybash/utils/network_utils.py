@@ -104,6 +104,25 @@ def server_arguments():
     _server_parsergroupdeq.add_argument(
         "--options", type=str, help="Extra options", metavar="", default=""
     )
+    _server_parsergroupdeq.add_argument(
+        "--dhcp_ip", type=str, help="DHCP server IP to advertise", required=False, metavar=""
+    )
+    _server_parsergroupdeq.add_argument(
+        "--dhcp_ip_lease",
+        type=str,
+        help="IP address to lease to DHCP clients",
+        required=False,
+        metavar="",
+    )
+    _server_parsergroupdeq.add_argument(
+        "--subnet_mask", type=str, help="Subnet mask to offer via DHCP", required=False, metavar=""
+    )
+    _server_parsergroupdeq.add_argument(
+        "--router", type=str, help="Router/gateway IP to offer via DHCP", required=False, metavar=""
+    )
+    _server_parsergroupdeq.add_argument(
+        "--dns_server", type=str, help="DNS server IP to offer via DHCP", required=False, metavar=""
+    )
     _server_parsergroupdes = _server_parser.add_argument_group("Sniffer options")
     _server_parsergroupdes.add_argument(
         "--filter", type=str, help="setup the Sniffer filter", required=False

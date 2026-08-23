@@ -81,18 +81,14 @@ class BaseHttpServer(BaseServer, ABC):
                 )
 
             if request.method == b"GET":
+                request.responseHeaders.addRawHeader("Content-Type", "text/html; charset=utf-8")
                 if (
-                    request.uri == b"/login.html"
+                    request.uri in (b"/login.html", b"/")
                     and self.hp_server.username != ""
                     and self.hp_server.password != ""
                 ):
-                    request.responseHeaders.addRawHeader(
-                        "Content-Type", "text/html; charset=utf-8"
-                    )
                     return self.login_file
-
-                request.responseHeaders.addRawHeader("Content-Type", "text/html; charset=utf-8")
-                return self.login_file
+                return self.home_file
 
             if request.method == b"POST":
                 self.headers = request.getAllHeaders()
@@ -100,8 +96,10 @@ class BaseHttpServer(BaseServer, ABC):
                     request.uri in (b"/login.html", b"/")
                     and self.hp_server.username != ""
                     and self.hp_server.password != ""
+                    and b"content-length" in self.headers
                 ):
-                    form = parse_qs(request.content.read(int(self.headers.get(b"content-length"))))
+                    content_length = int(self.headers[b"content-length"])
+                    form = parse_qs(request.content.read(content_length))
                     if b"username" in form and b"password" in form:
                         username = check_bytes(form[b"username"][0])
                         password = check_bytes(form[b"password"][0])

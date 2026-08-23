@@ -18,10 +18,11 @@ setup(
         "redis>=5.0.0",
         "pymysql>=1.1.0",
         "zope.interface>=6.0",
+        "scapy>=2.5.0",
     ],
     entry_points={
         "console_scripts": [
-            "honeybash=HoneyBash.__main__:main_logic",
+            "honeybash=honeybash.__main__:main_logic",
         ],
     },
     python_requires=">=3.9",

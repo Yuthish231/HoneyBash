@@ -41,7 +41,7 @@ from tempfile import gettempdir
 from typing import Any, MutableMapping
 from urllib.parse import urlparse
 
-from honeybash.storage.storage_backends import PostgresClass, SqliteClass
+from honeybash.storage.storage_backends import POSTGRES_AVAILABLE, PostgresClass, SqliteClass
 
 
 def set_up_error_logging():
@@ -216,7 +216,12 @@ class CustomHandler(Handler):
         self.logs = logs
         self.uuid = uuid
         self.custom_filter = custom_filter
-        if config and "db_postgres" in self.logs:
+        if config and "db_postgres" in self.logs and not POSTGRES_AVAILABLE:
+            logger.error(
+                "db_postgres logging was requested but the 'psycopg' driver is not installed; "
+                "skipping db_postgres logging instead of crashing"
+            )
+        elif config and "db_postgres" in self.logs:
             self.db["db_postgres"] = PostgresClass(
                 path="postgresql://{}:{}@{}:{}".format(
                     config["postgres"]["username"],

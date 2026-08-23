@@ -42,10 +42,6 @@ class QHTTPProxyServer(BaseServer):
         _q_s = self
 
         class CustomProtocolParent(Protocol):
-            def __init__(self):
-                self.buffer = None
-                self.client = None
-
             def resolve_domain(self, request_string):
                 with suppress(Exception):
                     _, parsed_request = request_string.split(b"\r\n", 1)
@@ -75,11 +71,6 @@ class QHTTPProxyServer(BaseServer):
                     self.write(_create_dummy_response(_q_s.template_contents or DUMMY_TEMPLATE))
                 else:
                     self.transport.loseConnection()
-
-                if self.client:
-                    self.client.write(data)
-                else:
-                    self.buffer = data
 
             def write(self, data):
                 self.transport.write(data)

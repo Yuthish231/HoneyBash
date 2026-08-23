@@ -65,13 +65,19 @@ HoneyBash is a multi-protocol honeypot framework written in Python. It provides 
 
 ### Command Line Interface
 
-HoneyBash can be executed using the package manager CLI:
+Install the package first (editable install is recommended during development):
 
 ```bash
-python -m HoneyBash [options]
+pip install -e .
 ```
 
-Or if installed via `pip install -e .`:
+HoneyBash can then be executed as a module:
+
+```bash
+python -m honeybash [options]
+```
+
+Or via the installed console script:
 
 ```bash
 honeybash [options]
@@ -79,11 +85,12 @@ honeybash [options]
 
 ### Running Specific Honeypots
 
-To run individual honeypots directly:
+To run individual honeypots directly (requires the package to be installed, e.g. via
+`pip install -e .`, so that `honeybash` is importable regardless of your current directory):
 
 ```bash
-python honeypots/ssh_server.py --port 2222
-python honeypots/http_server.py --port 8080
+python -m honeybash.honeypots.ssh_server --port 2222 --custom
+python -m honeybash.honeypots.http_server --port 8080 --custom
 ```
 
 ### Configuration
@@ -94,15 +101,18 @@ Honeypot services accept custom parameters such as binding IP address, port numb
 
 ```text
 HoneyBash/
-├── cli/              # Command line manager and CLI banners
-├── config/           # Configuration loader and setting utilities
-├── core/             # Base honeypot server definitions
-├── data/             # HTML templates for HTTP honeypots
-├── honeypots/        # Protocol-specific honeypot implementations
-├── logging/          # Event logger and serialization handlers
-├── network/          # Network sniffer module
-├── storage/          # Storage backends (SQLite and PostgreSQL)
-└── utils/            # General utilities and certificate generation
+├── setup.py
+├── requirements.txt
+└── honeybash/         # importable package (must be installed / on sys.path as "honeybash")
+    ├── cli/            # Command line manager and CLI banners
+    ├── config/         # Configuration loader and setting utilities
+    ├── core/           # Base honeypot server definitions
+    ├── data/           # HTML templates for HTTP honeypots
+    ├── honeypots/      # Protocol-specific honeypot implementations
+    ├── logging/        # Event logger and serialization handlers
+    ├── network/        # Network sniffer module
+    ├── storage/        # Storage backends (SQLite and PostgreSQL)
+    └── utils/          # General utilities and certificate generation
 ```
 
 ## Logging and Analytics
