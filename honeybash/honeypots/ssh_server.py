@@ -208,6 +208,15 @@ class QSSHServer(BaseServer):
                     break
                 _respond(conn, line, emulator)
 
+        if "llm" in _q_s.options:
+            start_new_thread(
+                OllamaClient(
+                    model=getattr(_q_s, "llm_model", None),
+                    host=getattr(_q_s, "llm_host", None),
+                ).warm_up,
+                (),
+            )
+
         sock = socket(AF_INET, SOCK_STREAM)
         sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         sock.bind((self.ip, self.port))

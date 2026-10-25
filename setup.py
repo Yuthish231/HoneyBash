@@ -8,6 +8,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "twisted>=24.0.0",
+        "service_identity>=24.1.0",
         "dnspython>=2.6.0",
         "paramiko>=3.4.0",
         "pyOpenSSL>=24.0.0",

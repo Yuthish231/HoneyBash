@@ -22,8 +22,8 @@ class OllamaClient:
         self,
         model: str | None = None,
         host: str | None = None,
-        timeout: float = 20.0,
-        max_tokens: int = 256,
+        timeout: float = 45.0,
+        max_tokens: int = 128,
         temperature: float = 0.2,
     ):
         self.model = model or getenv("HONEYBASH_LLM_MODEL") or DEFAULT_MODEL
@@ -54,6 +54,20 @@ class OllamaClient:
             return None
         # reasoning models (e.g. deepseek-r1) prepend <think> blocks; never show them
         return THINK_REGEX.sub("", content).strip("\n")
+
+    def warm_up(self) -> bool:
+        """Load the model into memory so the first attacker command is not stuck on a cold start."""
+        payload = {"model": self.model, "prompt": "", "stream": False, "keep_alive": "30m"}
+        request = Request(
+            f"{self.host}/api/generate",
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urlopen(request, timeout=300):  # noqa: S310
+                return True
+        except (URLError, TimeoutError, OSError):
+            return False
 
     def is_available(self) -> bool:
         try:
