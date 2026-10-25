@@ -115,6 +115,17 @@ HoneyBash/
     └── utils/          # General utilities and certificate generation
 ```
 
+## Offline LLM Shell (Ollama)
+
+The SSH honeypot can answer attacker commands with a local LLM instead of a fixed command table, so `cat`, `ls -la`, `ps`, `find`, etc. look realistic and stay consistent within a session. Nothing leaves the machine; if Ollama is down or busy, it falls back to the static responses.
+
+```bash
+ollama pull llama3.1:8b          # recommended; llama3.2:3b for lower latency
+python -m honeybash.honeypots.ssh_server --custom --port 2222 --options interactive,capture_commands,llm
+```
+
+Add `llm` to `--options` (together with `interactive`). Model and host are set with `HONEYBASH_LLM_MODEL` / `HONEYBASH_OLLAMA_HOST`, or `llm_model` / `llm_host` in the honeypot's config-file entry. Avoid reasoning models (e.g. `deepseek-r1`): their thinking delay is easy for attackers to spot.
+
 ## Logging and Analytics
 
 All captured events (connections, authentication attempts, raw commands) are serialized into JSON records and written to structured logs and local SQLite database files for subsequent analysis.

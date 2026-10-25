@@ -27,6 +27,7 @@ from paramiko.common import (
 from paramiko.ssh_exception import SSHException
 
 from honeybash.core.base_honeypot import BaseServer
+from honeybash.llm import LLMShellEmulator, OllamaClient
 from honeybash.utils.network_utils import (
     server_arguments,
     check_bytes,
@@ -93,6 +94,7 @@ class QSSHServer(BaseServer):
             def __init__(self, ip, port):
                 self.ip = ip
                 self.port = port
+                self.username = "root"
                 self.event = Event()
 
             def check_channel_request(self, kind, *_, **__):
@@ -103,6 +105,7 @@ class QSSHServer(BaseServer):
             def check_auth_password(self, username, password):
                 username = check_bytes(username)
                 password = check_bytes(password)
+                self.username = username
                 if _q_s.check_login(username, password, self.ip, self.port):
                     return AUTH_SUCCESSFUL
                 return AUTH_FAILED
@@ -124,6 +127,7 @@ class QSSHServer(BaseServer):
                 return "password,publickey"
 
             def check_auth_publickey(self, username, key):
+                self.username = check_bytes(username)
                 _q_s.log(
                     {
                         "action": "login",
@@ -170,12 +174,21 @@ class QSSHServer(BaseServer):
 
                 with session.accept(30) as conn:
                     if "interactive" in _q_s.options and conn is not None:
-                        _handle_interactive_session(conn, ip, port)
+                        _handle_interactive_session(conn, ip, port, ssh_handle.username)
                     with suppress(TimeoutError):
                         ssh_handle.event.wait(2)
 
-        def _handle_interactive_session(conn: Channel, ip: str, port: int):
+        def _handle_interactive_session(conn: Channel, ip: str, port: int, username: str):
             conn.send(b"Welcome to Ubuntu 20.04 LTS (GNU/Linux 5.4.0-26-generic x86_64)\r\n\r\n")
+            emulator = None
+            if "llm" in _q_s.options:
+                emulator = LLMShellEmulator(
+                    OllamaClient(
+                        model=getattr(_q_s, "llm_model", None),
+                        host=getattr(_q_s, "llm_host", None),
+                    ),
+                    username=username,
+                )
             timeout = time() + 300
             while time() < timeout:
                 try:
@@ -193,7 +206,7 @@ class QSSHServer(BaseServer):
                 )
                 if line == "exit":
                     break
-                _respond(conn, line)
+                _respond(conn, line, emulator)
 
         sock = socket(AF_INET, SOCK_STREAM)
         sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -245,7 +258,7 @@ def _receive_line(conn: Channel) -> str:
     return line.strip().decode(errors="replace")
 
 
-def _respond(conn: Channel, line: str):
+def _respond(conn: Channel, line: str, emulator: LLMShellEmulator | None = None):
     if line == "" or line.endswith(CTRL_C.decode()):
         return
     if line in COMMANDS:
@@ -254,7 +267,12 @@ def _respond(conn: Channel, line: str):
             response = response.replace(
                 "%TIME", datetime.now().strftime("%a %b %d %H:%M:%S UTC %Y")
             )
+        if emulator:
+            emulator.record(line, response)
         conn.send(f"{response}\r\n".encode())
+    elif emulator and (generated := emulator.respond(line)) is not None:
+        if generated:
+            conn.send(generated.replace("\r\n", "\n").replace("\n", "\r\n").encode() + b"\r\n")
     elif line.startswith("cd "):
         target = _parse_args(line)
         if not target:
