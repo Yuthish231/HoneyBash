@@ -18,9 +18,8 @@ class QHTTPSServer(BaseHttpServer):
     def server_main(self):
         resource = self.MainResource(hp_server=self)
         with create_certificate() as (cert, key):
-            cert_obj = ssl.Certificate.loadPEM(Path(cert).read_bytes())
-            key_obj = ssl.KeyPair.loadPEM(Path(key).read_bytes())
-            ssl_context = cert_obj.options(key_obj)
+            cert_obj = ssl.PrivateCertificate.loadPEM(Path(cert).read_bytes() + Path(key).read_bytes())
+            ssl_context = cert_obj.options()
             reactor.listenSSL(self.port, Site(resource), ssl_context, interface=self.ip)
             reactor.run()
 

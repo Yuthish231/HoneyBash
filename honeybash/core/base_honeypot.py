@@ -59,9 +59,12 @@ class BaseServer(ABC):
         self._server_process: Process | None = None
 
     def close_port(self):
-        sock = socket(AF_INET, SOCK_STREAM)
-        sock.settimeout(2)
-        if sock.connect_ex((self.ip, self.port)) == 0:
+        # 0.0.0.0 is not connectable on Windows, probe loopback instead
+        probe_ip = "127.0.0.1" if self.ip in ("0.0.0.0", "") else self.ip
+        with socket(AF_INET, SOCK_STREAM) as probe:
+            probe.settimeout(2)
+            in_use = probe.connect_ex((probe_ip, self.port)) == 0
+        if in_use:
             for process in process_iter():
                 with suppress(Exception):
                     for conn in process.connections(kind="inet"):
@@ -71,10 +74,10 @@ class BaseServer(ABC):
                                 process.wait(timeout=5)
                             except TimeoutExpired:
                                 process.kill()
-        with suppress(OSError):
+        # a fresh socket is needed: a socket that failed connect() cannot be bound on Windows
+        with suppress(OSError), socket(AF_INET, SOCK_STREAM) as sock:
             sock.bind((self.ip, self.port))
-            if sock.connect_ex((self.ip, self.port)) != 0:
-                return True
+            return True
         self.logger.error(f"[{self.NAME}]: Could not close port {self.port}")
         return False
 
