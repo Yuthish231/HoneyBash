@@ -11,6 +11,8 @@ HoneyBash is a multi-protocol honeypot framework written in Python. It provides 
 - Configurable service banners and custom port bindings.
 - Ephemeral TLS certificate generation for HTTPS honeypot testing.
 
+Full documentation (architecture, per-service file map, configuration, event format): [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md).
+
 ## Supported Protocols
 
 | Protocol | Service Name | Default Port | Description |
