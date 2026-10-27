@@ -124,7 +124,7 @@ ollama pull llama3.1:8b          # recommended; llama3.2:3b for lower latency
 python -m honeybash.honeypots.ssh_server --custom --port 2222 --options interactive,capture_commands,llm
 ```
 
-Add `llm` to `--options` (together with `interactive`). Model and host are set with `HONEYBASH_LLM_MODEL` / `HONEYBASH_OLLAMA_HOST`, or `llm_model` / `llm_host` in the honeypot's config-file entry. Avoid reasoning models (e.g. `deepseek-r1`): their thinking delay is easy for attackers to spot.
+Add `llm` to `--options` (together with `interactive`). Model, host and reply timeout (seconds, default 300) are set with `HONEYBASH_LLM_MODEL` / `HONEYBASH_OLLAMA_HOST` / `HONEYBASH_LLM_TIMEOUT`, or `llm_model` / `llm_host` in the honeypot's config-file entry. Avoid reasoning models (e.g. `deepseek-r1`): their thinking delay is easy for attackers to spot.
 
 ## Logging and Analytics
 

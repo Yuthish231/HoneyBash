@@ -12,6 +12,8 @@ logger = logging.getLogger("honeybash.error")
 DEFAULT_HOST = "http://127.0.0.1:11434"
 # Non-reasoning instruct model: low latency matters more than depth for a fake shell.
 DEFAULT_MODEL = "llama3.1:8b"
+# CPU-only inference of an 8B model can take minutes per reply; override with HONEYBASH_LLM_TIMEOUT
+DEFAULT_TIMEOUT = 300.0
 THINK_REGEX = re.compile(r"<think>.*?(?:</think>|$)", re.DOTALL)
 
 
@@ -22,13 +24,13 @@ class OllamaClient:
         self,
         model: str | None = None,
         host: str | None = None,
-        timeout: float = 45.0,
+        timeout: float | None = None,
         max_tokens: int = 128,
         temperature: float = 0.2,
     ):
         self.model = model or getenv("HONEYBASH_LLM_MODEL") or DEFAULT_MODEL
         self.host = (host or getenv("HONEYBASH_OLLAMA_HOST") or DEFAULT_HOST).rstrip("/")
-        self.timeout = timeout
+        self.timeout = timeout or float(getenv("HONEYBASH_LLM_TIMEOUT") or DEFAULT_TIMEOUT)
         self.max_tokens = max_tokens
         self.temperature = temperature
 
